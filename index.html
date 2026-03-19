@@ -11,9 +11,11 @@
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f0f9ff;
-            overflow: hidden;
+            overflow-x: hidden;
             user-select: none;
             touch-action: manipulation;
+            margin: 0;
+            padding: 0;
         }
 
         /* 游戏卡片动画 */
@@ -49,23 +51,23 @@
 
         /* 数字填空框 */
         .blank-box {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border: 4px solid #cbd5e1;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 15px;
+            border-radius: 12px;
             background: #fff;
-            margin: 0 8px;
-            font-size: 2rem;
+            margin: 0 4px;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #3b82f6;
         }
         .blank-box.active {
             border-color: #3b82f6;
             background: #eff6ff;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
         }
 
         /* 播放按钮脉冲动画 */
@@ -82,6 +84,13 @@
             background: linear-gradient(135deg, #4ade80, #22c55e);
             box-shadow: 0 4px 0 #16a34a;
         }
+
+        /* 解决溢出：让容器可以内部滚动 */
+        #main-container {
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -89,69 +98,70 @@
     <canvas id="canvas-confetti" class="celebration-canvas"></canvas>
 
     <!-- 顶部导航 -->
-    <header class="w-full p-4 flex justify-between items-center bg-white shadow-sm z-50">
+    <header class="w-full p-3 flex justify-between items-center bg-white shadow-sm z-50">
         <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
-            <span class="text-3xl">🏠</span>
-            <h1 class="text-xl font-bold text-blue-600">数学乐园</h1>
+            <span class="text-2xl">🏠</span>
+            <h1 class="text-lg font-bold text-blue-600">数学乐园</h1>
         </div>
-        <div id="top-title" class="text-lg font-bold text-orange-500">加油！小朋友</div>
+        <div id="top-title" class="text-md font-bold text-orange-500">加油！</div>
     </header>
 
-    <main id="app" class="w-full max-w-4xl p-4 flex flex-col items-center justify-center min-h-[85vh] relative">
+    <main id="main-container" class="w-full max-w-4xl p-2 relative flex flex-col items-center">
         
         <!-- 首页：简化后的平铺导航 -->
-        <div id="view-home" class="w-full grid grid-cols-1 md:grid-cols-2 gap-8 px-4 py-8 overflow-y-auto max-h-[85vh]">
+        <div id="view-home" class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-2 py-4">
             
             <!-- 单元一 -->
-            <div class="bg-pink-50 p-6 rounded-[2.5rem] border-4 border-pink-100 flex flex-col items-center gap-4">
-                <h3 class="text-2xl font-black text-pink-600">🎨 单元一</h3>
-                <div class="flex flex-col w-full gap-3">
-                    <button onclick="startUnit(1, 1)" class="game-card bg-pink-400 text-white py-4 rounded-2xl font-bold shadow-md">认识形状</button>
-                    <button onclick="startUnit(1, 2)" class="game-card bg-purple-400 text-white py-4 rounded-2xl font-bold shadow-md">规律排列</button>
+            <div class="bg-pink-50 p-5 rounded-[2rem] border-4 border-pink-100 flex flex-col items-center gap-3">
+                <h3 class="text-xl font-black text-pink-600">🎨 单元一</h3>
+                <div class="flex flex-col w-full gap-2">
+                    <button onclick="startUnit(1, 1)" class="game-card bg-pink-400 text-white py-3 rounded-xl font-bold shadow-md">认识形状</button>
+                    <button onclick="startUnit(1, 2)" class="game-card bg-purple-400 text-white py-3 rounded-xl font-bold shadow-md">规律排列</button>
                 </div>
             </div>
 
             <!-- 单元二 -->
-            <div class="bg-blue-50 p-6 rounded-[2.5rem] border-4 border-blue-100 flex flex-col items-center gap-4">
-                <h3 class="text-2xl font-black text-blue-600">📏 单元二</h3>
-                <div class="flex flex-col w-full gap-3">
-                    <button onclick="startUnit(2, 1)" class="game-card bg-blue-400 text-white py-4 rounded-2xl font-bold shadow-md">比一比</button>
-                    <button onclick="startUnit(2, 3)" class="game-card bg-orange-400 text-white py-4 rounded-2xl font-bold shadow-md">数字 1-10</button>
-                    <button onclick="startUnit(2, 4)" class="game-card bg-indigo-400 text-white py-4 rounded-2xl font-bold shadow-md">数字顺序</button>
+            <div class="bg-blue-50 p-5 rounded-[2rem] border-4 border-blue-100 flex flex-col items-center gap-3">
+                <h3 class="text-xl font-black text-blue-600">📏 单元二</h3>
+                <div class="flex flex-col w-full gap-2">
+                    <button onclick="startUnit(2, 1)" class="game-card bg-blue-400 text-white py-3 rounded-xl font-bold shadow-md">比一比</button>
+                    <button onclick="startUnit(2, 3)" class="game-card bg-orange-400 text-white py-3 rounded-xl font-bold shadow-md">数字 1-10</button>
+                    <button onclick="startUnit(2, 4)" class="game-card bg-indigo-400 text-white py-3 rounded-xl font-bold shadow-md">数字顺序</button>
                 </div>
             </div>
 
             <!-- 单元四 -->
-            <div class="bg-emerald-50 p-6 rounded-[2.5rem] border-4 border-emerald-100 flex flex-col items-center gap-4 md:col-span-2">
-                <h3 class="text-2xl font-black text-emerald-600">🚀 重点：单元四 (11-20)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 w-full gap-4">
-                    <button onclick="startUnit(4, 1)" class="game-card bg-emerald-500 text-white py-6 rounded-2xl font-bold text-xl shadow-lg">🔢 数一数 11-20</button>
-                    <button onclick="startUnit(4, 2)" class="game-card bg-orange-500 text-white py-6 rounded-2xl font-bold text-xl shadow-lg">🎯 认读数字射击</button>
+            <div class="bg-emerald-50 p-5 rounded-[2rem] border-4 border-emerald-100 flex flex-col items-center gap-3 md:col-span-2">
+                <h3 class="text-xl font-black text-emerald-600">🚀 单元四 (11-20)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 w-full gap-3">
+                    <button onclick="startUnit(4, 1)" class="game-card bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg">🔢 数一数 11-20</button>
+                    <button onclick="startUnit(4, 2)" class="game-card bg-orange-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg">🎯 认读数字射击</button>
                 </div>
             </div>
 
         </div>
 
         <!-- 游戏区域 -->
-        <div id="view-game" class="hidden w-full h-full flex flex-col items-center relative">
-            <div id="game-question" class="text-3xl font-bold text-gray-700 mb-4 text-center z-10"></div>
+        <div id="view-game" class="hidden w-full flex flex-col items-center relative py-4">
+            <div id="game-question" class="text-2xl font-bold text-gray-700 mb-4 text-center z-10 px-2"></div>
             
-            <div id="game-stage" class="w-full flex-grow relative flex flex-col items-center justify-center min-h-[350px] mb-4 bg-white/40 rounded-3xl border-4 border-dashed border-gray-200 overflow-hidden">
-                <!-- 游戏主体 -->
+            <!-- 游戏舞台：调整高度适应移动端 -->
+            <div id="game-stage" class="w-full flex-grow relative flex flex-col items-center justify-center min-h-[200px] mb-4 bg-white/40 rounded-3xl border-2 border-dashed border-gray-200 overflow-hidden">
+                <!-- 游戏主体内容 -->
             </div>
 
-            <div id="game-options" class="w-full flex justify-center flex-wrap gap-4 p-4 z-10">
-                <!-- 选项 -->
+            <div id="game-options" class="w-full flex justify-center flex-wrap gap-3 p-2 z-10">
+                <!-- 选项按钮 -->
             </div>
             
-            <button id="btn-submit" onclick="checkAnswer()" class="hidden mb-6 bg-green-500 text-white px-16 py-5 rounded-full text-2xl font-bold shadow-xl active:scale-95 transition">提交答案</button>
+            <button id="btn-submit" onclick="checkAnswer()" class="hidden my-4 bg-green-500 text-white px-12 py-3 rounded-full text-xl font-bold shadow-xl active:scale-95 transition">提交答案</button>
         </div>
 
-        <!-- 反馈弹窗 -->
+        <!-- 反馈层 -->
         <div id="overlay-feedback" class="hidden absolute inset-0 bg-white/95 rounded-3xl flex flex-col items-center justify-center z-[100]">
-            <div id="feedback-emoji" class="text-9xl mb-6">🎉</div>
-            <h3 id="feedback-msg" class="text-4xl font-bold mb-8">太棒了！</h3>
-            <button onclick="loadNextQuestion()" class="bg-blue-500 text-white px-16 py-5 rounded-full text-2xl font-bold shadow-lg active:scale-95">下一题</button>
+            <div id="feedback-emoji" class="text-8xl mb-4">🎉</div>
+            <h3 id="feedback-msg" class="text-3xl font-bold mb-6">太棒了！</h3>
+            <button onclick="loadNextQuestion()" class="bg-blue-500 text-white px-12 py-4 rounded-full text-xl font-bold shadow-lg active:scale-95">下一题</button>
         </div>
 
     </main>
@@ -178,13 +188,25 @@
         let userAnswer = null;
         let shootingInterval = null;
 
-        // --- 核心逻辑 ---
+        // --- 音效功能 ---
+        function playSound(type) {
+            const utterance = new SpeechSynthesisUtterance();
+            utterance.lang = 'zh-CN';
+            utterance.rate = 1.1;
+            if (type === 'correct') {
+                utterance.text = "耶！太棒了！";
+            } else if (type === 'wrong') {
+                utterance.text = "再试一试。";
+            }
+            window.speechSynthesis.speak(utterance);
+        }
 
+        // --- 导航 ---
         function goHome() {
             clearInterval(shootingInterval);
             document.getElementById('view-home').classList.remove('hidden');
             document.getElementById('view-game').classList.add('hidden');
-            document.getElementById('top-title').innerText = "请选一个游戏";
+            document.getElementById('top-title').innerText = "选一个游戏";
         }
 
         function startUnit(unit, game) {
@@ -192,7 +214,7 @@
             currentGame = game;
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-game').classList.remove('hidden');
-            document.getElementById('top-title').innerText = `单元 ${unit} 挑战中`;
+            document.getElementById('top-title').innerText = `单元 ${unit}`;
             generatePool();
             loadNextQuestion();
         }
@@ -217,7 +239,7 @@
             document.getElementById('overlay-feedback').classList.add('hidden');
             const stage = document.getElementById('game-stage');
             stage.innerHTML = '';
-            stage.className = "w-full flex-grow relative flex flex-col items-center justify-center min-h-[350px] mb-4 bg-white/40 rounded-3xl border-4 border-dashed border-gray-200 overflow-hidden";
+            stage.className = "w-full flex-grow relative flex flex-col items-center justify-center min-h-[200px] mb-4 bg-white/40 rounded-3xl border-2 border-dashed border-gray-200 overflow-hidden";
             document.getElementById('game-options').innerHTML = '';
             document.getElementById('btn-submit').classList.add('hidden');
             
@@ -231,16 +253,23 @@
             const opts = document.getElementById('game-options');
             const qText = document.getElementById('game-question');
 
-            // 单元一与单元二逻辑恢复
             if (currentUnit === 1) {
                 if (currentGame === 1) { // 认识形状
                     qText.innerText = `请点击：${data.name}`;
                     currentTarget = data.id;
                     const group = shuffle([...SHAPES]).slice(0, 4);
                     if (!group.find(s => s.id === data.id)) group[0] = data;
-                    shuffle(group).forEach(s => opts.appendChild(createItemCard(getShapeSVG(s, 110), () => checkAnswer(s.id === currentTarget))));
+                    
+                    // 优化布局：将选项放在 stage 里，减小高度
+                    const grid = document.createElement('div');
+                    grid.className = "grid grid-cols-2 gap-4 p-4 w-full justify-items-center";
+                    shuffle(group).forEach(s => {
+                        const card = createItemCard(getShapeSVG(s, 100), () => checkAnswer(s.id === currentTarget));
+                        grid.appendChild(card);
+                    });
+                    stage.appendChild(grid);
                 } else { // 找规律
-                    qText.innerText = "接下来是什么形状呢？";
+                    qText.innerText = "接下来是什么呢？";
                     const sA = SHAPES[Math.floor(Math.random()*SHAPES.length)];
                     const sB = SHAPES.find(s=>s.id!==sA.id);
                     const sC = SHAPES.find(s=>s.id!==sA.id && s.id!==sB.id);
@@ -252,51 +281,51 @@
                     else { seq=[sA,sA,sB,sB,sA,sA]; ans=sB; }
                     currentTarget = ans.id;
                     const seqDiv = document.createElement('div');
-                    seqDiv.className = "flex gap-2 bg-white p-6 rounded-3xl shadow-inner border-2";
-                    seq.forEach(s => seqDiv.innerHTML += getShapeSVG(s, 50));
-                    seqDiv.innerHTML += `<div class="w-12 h-12 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-300 font-bold">?</div>`;
+                    seqDiv.className = "flex flex-wrap justify-center gap-2 bg-white p-4 rounded-2xl shadow-inner border";
+                    seq.forEach(s => seqDiv.innerHTML += getShapeSVG(s, 40));
+                    seqDiv.innerHTML += `<div class="w-10 h-10 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-gray-300 font-bold">?</div>`;
                     stage.appendChild(seqDiv);
-                    [ans, SHAPES.find(s=>s.id!==ans.id)].sort(()=>Math.random()-0.5).forEach(s => opts.appendChild(createItemCard(getShapeSVG(s, 90), () => checkAnswer(s.id === currentTarget))));
+                    [ans, SHAPES.find(s=>s.id!==ans.id)].sort(()=>Math.random()-0.5).forEach(s => opts.appendChild(createItemCard(getShapeSVG(s, 80), () => checkAnswer(s.id === currentTarget))));
                 }
             } else if (currentUnit === 2) {
                 if (currentGame === 1) { // 比一比
                     const map = {
-                        'big': { t:'大的', items:[{v:1, s:1.4},{v:0, s:0.7}], type:'size' },
-                        'small': { t:'小的', items:[{v:1, s:0.7},{v:0, s:1.4}], type:'size' },
-                        'tall': { t:'高的', items:[{v:1, h:150},{v:0, h:80}], type:'height' },
-                        'short': { t:'矮的', items:[{v:1, h:80},{v:0, h:150}], type:'height' },
-                        'long': { t:'长的', items:[{v:1, w:180},{v:0, w:80}], type:'len' },
-                        'short_len': { t:'短的', items:[{v:1, w:80},{v:0, w:180}], type:'len' },
-                        'thick': { t:'厚的', items:[{v:1, sw:15},{v:0, sw:3}], type:'thickness' },
-                        'thin': { t:'薄的', items:[{v:1, sw:3},{v:0, sw:15}], type:'thickness' }
+                        'big': { t:'大的', items:[{v:1, s:1.3},{v:0, s:0.7}], type:'size' },
+                        'small': { t:'小的', items:[{v:1, s:0.7},{v:0, s:1.3}], type:'size' },
+                        'tall': { t:'高的', items:[{v:1, h:130},{v:0, h:70}], type:'height' },
+                        'short': { t:'矮的', items:[{v:1, h:70},{v:0, h:130}], type:'height' },
+                        'long': { t:'长的', items:[{v:1, w:160},{v:0, w:80}], type:'len' },
+                        'short_len': { t:'短的', items:[{v:1, w:80},{v:0, w:160}], type:'len' },
+                        'thick': { t:'厚的', items:[{v:1, sw:14},{v:0, sw:2}], type:'thickness' },
+                        'thin': { t:'薄的', items:[{v:1, sw:2},{v:0, sw:14}], type:'thickness' }
                     };
                     const config = map[data];
                     qText.innerText = `请点击：${config.t}`;
                     const container = document.createElement('div');
-                    container.className = "flex items-end gap-12";
+                    container.className = "flex items-end gap-10 p-4";
                     shuffle(config.items).forEach(item => {
                         let svg = '';
-                        if(config.type==='size') svg = `<svg width="120" height="120"><circle cx="60" cy="60" r="${40*item.s}" fill="#f87171"/></svg>`;
-                        else if(config.type==='height') svg = `<svg width="60" height="160"><rect x="10" y="${160-item.h}" width="40" height="${item.h}" fill="#fbbf24" rx="5"/></svg>`;
-                        else if(config.type==='len') svg = `<svg width="200" height="40"><rect x="0" y="10" width="${item.w}" height="20" fill="#60a5fa" rx="10"/></svg>`;
-                        else svg = `<svg width="100" height="100"><rect x="20" y="20" width="60" height="60" fill="white" stroke="#a78bfa" stroke-width="${item.sw}" rx="5"/></svg>`;
+                        if(config.type==='size') svg = `<svg width="100" height="100"><circle cx="50" cy="50" r="${35*item.s}" fill="#f87171"/></svg>`;
+                        else if(config.type==='height') svg = `<svg width="50" height="140"><rect x="5" y="${140-item.h}" width="40" height="${item.h}" fill="#fbbf24" rx="5"/></svg>`;
+                        else if(config.type==='len') svg = `<svg width="170" height="30"><rect x="0" y="5" width="${item.w}" height="20" fill="#60a5fa" rx="10"/></svg>`;
+                        else svg = `<svg width="80" height="80"><rect x="15" y="15" width="50" height="50" fill="white" stroke="#a78bfa" stroke-width="${item.sw}" rx="5"/></svg>`;
                         container.appendChild(createItemCard(svg, () => checkAnswer(item.v === 1)));
                     });
                     stage.appendChild(container);
                 } else if (currentGame === 3) { // 1-10数数
                     const icon = '🍎';
-                    qText.innerText = `数一数，有几个 ${icon}？`;
+                    qText.innerText = `数一数，有几个？`;
                     const grid = document.createElement('div');
-                    grid.className = "grid grid-cols-5 gap-4 p-6 bg-white rounded-3xl border-2";
-                    for(let i=0; i<data; i++) grid.innerHTML += `<span class="text-4xl">${icon}</span>`;
+                    grid.className = "grid grid-cols-5 gap-3 p-4 bg-white rounded-2xl border";
+                    for(let i=0; i<data; i++) grid.innerHTML += `<span class="text-3xl">${icon}</span>`;
                     stage.appendChild(grid);
                     [data, data+1, data-1].filter(n=>n>0 && n<=10).sort(()=>Math.random()-0.5).forEach(n => {
-                        opts.appendChild(createItemCard(`<div class="text-4xl font-bold text-orange-500">${n}</div>`, () => checkAnswer(n === data)));
+                        opts.appendChild(createItemCard(`<div class="text-3xl font-bold text-orange-500">${n}</div>`, () => checkAnswer(n === data)));
                     });
-                } else if (currentGame === 4) { // 数字填一填
+                } else if (currentGame === 4) { // 数字顺序
                     const isAsc = data.startsWith('asc');
                     const dirStr = isAsc ? "顺序 (从小到大)" : "逆序 (从大到小)";
-                    qText.innerHTML = `请填入缺失的数字<br><span class="text-blue-500 font-black text-4xl underline decoration-wavy">[${dirStr}]</span>`;
+                    qText.innerHTML = `填一填<br><span class="text-blue-500 font-black text-2xl">[${dirStr}]</span>`;
                     const start = Math.floor(Math.random()*5) + (isAsc?1:6);
                     let seq = [];
                     for(let i=0; i<5; i++) seq.push(isAsc ? start+i : start-i);
@@ -304,7 +333,7 @@
                     userAnswer = [null, null];
                     currentTarget = [seq[1], seq[3]];
                     const row = document.createElement('div');
-                    row.className = "flex items-center gap-2 mb-10";
+                    row.className = "flex flex-wrap justify-center items-center gap-1 mb-6";
                     seq.forEach((num, idx) => {
                         if(holes.includes(idx)) {
                             const hIdx = holes.indexOf(idx);
@@ -317,15 +346,15 @@
                             };
                             row.appendChild(box);
                         } else {
-                            row.innerHTML += `<div class="text-4xl font-bold text-gray-400 p-4">${num}</div>`;
+                            row.innerHTML += `<div class="text-3xl font-bold text-gray-400 p-2">${num}</div>`;
                         }
                     });
                     stage.appendChild(row);
                     const numGrid = document.createElement('div');
-                    numGrid.className = "grid grid-cols-5 gap-3 mt-4";
+                    numGrid.className = "grid grid-cols-5 gap-2 mt-2";
                     for(let i=1; i<=10; i++) {
                         const btn = document.createElement('button');
-                        btn.className = "w-16 h-16 bg-white rounded-2xl border-4 border-blue-100 font-bold text-2xl shadow-sm active:bg-blue-200";
+                        btn.className = "w-12 h-12 bg-white rounded-lg border-2 font-bold text-xl active:bg-blue-100 shadow-sm";
                         btn.innerText = i;
                         btn.onclick = () => {
                             const activeHole = document.querySelector('.blank-box.active');
@@ -342,30 +371,24 @@
                     setTimeout(() => document.getElementById('hole-0')?.click(), 100);
                 }
             } else if (currentUnit === 4) {
-                if (currentGame === 1) { // 11-20 计数
+                if (currentGame === 1) { // 11-20计数
                     const icon = '🍓';
-                    qText.innerText = `数一数，有几个 ${icon}？`;
+                    qText.innerText = `数一数：${data}个`;
                     const grid = document.createElement('div');
-                    grid.className = "grid grid-cols-5 md:grid-cols-10 gap-2 p-6 bg-white rounded-3xl border-2";
-                    for(let i=0; i<data; i++) grid.innerHTML += `<span class="text-4xl p-1">${icon}</span>`;
+                    grid.className = "grid grid-cols-5 md:grid-cols-10 gap-1 p-4 bg-white rounded-2xl border";
+                    for(let i=0; i<data; i++) grid.innerHTML += `<span class="text-3xl">${icon}</span>`;
                     stage.appendChild(grid);
                     const answers = shuffle([data, data+1, data-1].filter(n=>n>=11 && n<=20));
-                    answers.forEach(n => {
-                        opts.appendChild(createItemCard(`<div class="text-5xl font-bold text-emerald-600">${n}</div>`, () => checkAnswer(n === data)));
-                    });
+                    answers.forEach(n => opts.appendChild(createItemCard(`<div class="text-3xl font-bold text-emerald-600">${n}</div>`, () => checkAnswer(n === data))));
                 } else if (currentGame === 2) { // 射击
-                    qText.innerHTML = `看一看，认一认：<br><span class="text-orange-600 text-6xl font-black">${CHINESE_NUMS[data]}</span>`;
+                    qText.innerHTML = `认一认：<br><span class="text-orange-600 text-5xl font-black">${CHINESE_NUMS[data]}</span>`;
                     currentTarget = data;
                     stage.classList.add('bg-blue-50');
-                    
-                    // 创建“点击开始”层
                     const startOverlay = document.createElement('div');
                     startOverlay.className = "absolute inset-0 flex items-center justify-center bg-blue-50/80 z-20";
                     startOverlay.innerHTML = `
-                        <button onclick="startShootingGame(this)" class="play-icon-btn bg-white p-10 rounded-full shadow-2xl border-8 border-blue-100">
-                            <svg viewBox="0 0 24 24" width="100" height="100" fill="#3b82f6">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
+                        <button onclick="startShootingGame(this)" class="play-icon-btn bg-white p-8 rounded-full shadow-2xl border-4 border-blue-100">
+                            <svg viewBox="0 0 24 24" width="80" height="80" fill="#3b82f6"><path d="M8 5v14l11-7z"/></svg>
                         </button>
                     `;
                     stage.appendChild(startOverlay);
@@ -374,8 +397,7 @@
         }
 
         function startShootingGame(btn) {
-            const overlay = btn.parentElement;
-            overlay.remove();
+            btn.parentElement.remove();
             shootingInterval = setInterval(() => createShootingTarget(document.getElementById('game-stage')), 2500);
             createShootingTarget(document.getElementById('game-stage'));
         }
@@ -386,11 +408,11 @@
             const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
             const target = document.createElement('div');
             target.className = "target-item flex items-center justify-center";
-            const size = 110;
+            const size = 90;
             target.style.width = size + 'px';
             target.style.height = (size * 1.3) + 'px';
             target.style.left = Math.random() * (parent.clientWidth - size) + 'px';
-            target.style.animationDuration = (Math.random() * 5 + 12) + 's';
+            target.style.animationDuration = (Math.random() * 4 + 12) + 's';
             
             target.innerHTML = `
                 <div class="relative w-full h-full flex items-center justify-center">
@@ -399,14 +421,13 @@
                         <path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none"/>
                         <polygon points="50,100 45,105 55,105" fill="#64748b" />
                     </svg>
-                    <span class="relative text-3xl font-bold text-white">${val}</span>
+                    <span class="relative text-2xl font-bold text-white">${val}</span>
                 </div>
             `;
-
             target.onclick = (e) => {
                 e.stopPropagation();
                 if (val === currentTarget) {
-                    target.innerHTML = "<div class='text-5xl'>💥</div>";
+                    target.innerHTML = "<div class='text-4xl'>💥</div>";
                     setTimeout(() => checkAnswer(true), 400);
                 } else {
                     target.style.transform = "translateX(10px)";
@@ -419,7 +440,7 @@
 
         function createItemCard(html, onClick) {
             const div = document.createElement('div');
-            div.className = "p-6 bg-white rounded-3xl border-4 border-gray-100 shadow-md hover:border-blue-300 active:scale-90 transition-all cursor-pointer min-w-[120px] flex items-center justify-center";
+            div.className = "p-4 bg-white rounded-2xl border-4 border-gray-100 shadow-sm active:scale-90 transition-all cursor-pointer min-w-[90px] flex items-center justify-center";
             div.innerHTML = html;
             div.onclick = onClick;
             return div;
@@ -434,14 +455,16 @@
             const msg = document.getElementById('feedback-msg');
             overlay.classList.remove('hidden');
             if (isCorrect) {
+                playSound('correct');
                 emoji.innerText = "🎊";
                 msg.innerText = "太棒了！答对了！";
-                msg.className = "text-4xl font-bold text-green-600";
+                msg.className = "text-3xl font-bold text-green-600";
                 startConfetti();
             } else {
+                playSound('wrong');
                 emoji.innerText = "💡";
-                msg.innerText = "没关系，再试一次！";
-                msg.className = "text-4xl font-bold text-orange-500";
+                msg.innerText = "再试一试。";
+                msg.className = "text-3xl font-bold text-orange-500";
             }
         }
 
@@ -452,15 +475,15 @@
             canvas.height = window.innerHeight;
             const particles = [];
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            for (let i = 0; i < 150; i++) {
+            for (let i = 0; i < 120; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: -20,
-                    w: Math.random() * 8 + 4,
-                    h: Math.random() * 12 + 6,
+                    w: Math.random() * 6 + 4,
+                    h: Math.random() * 10 + 6,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: Math.random() * 6 + 4,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: Math.random() * 5 + 4,
                     angle: Math.random() * 360,
                     vAngle: (Math.random() - 0.5) * 10
                 });
@@ -472,12 +495,8 @@
                     p.x += p.vx; p.y += p.vy; p.angle += p.vAngle;
                     if (p.y < canvas.height) {
                         active = true;
-                        ctx.save();
-                        ctx.translate(p.x, p.y);
-                        ctx.rotate(p.angle * Math.PI / 180);
-                        ctx.fillStyle = p.color;
-                        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-                        ctx.restore();
+                        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle * Math.PI / 180);
+                        ctx.fillStyle = p.color; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
                     }
                 });
                 if (active) requestAnimationFrame(frame);
@@ -506,10 +525,7 @@
         window.onload = goHome;
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('canvas-confetti');
-            if(canvas) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
+            if(canvas) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         });
     </script>
 </body>
