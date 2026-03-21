@@ -25,17 +25,27 @@
             pointer-events: none; z-index: 100;
         }
 
-        /* 气球向上飞出的动画：从屏幕底部飞到屏幕上方完全消失 */
+        /* 气球向上飞出的动画 */
         @keyframes float-up {
             0% { transform: translateY(110vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-150px) rotate(20deg); opacity: 0.9; }
+            100% { transform: translateY(-200px) rotate(20deg); opacity: 0.9; }
         }
 
         .target-item {
             position: absolute; cursor: pointer;
             animation: float-up 9s linear forwards; 
             z-index: 30; pointer-events: auto;
-            top: 0; /* 动画通过translateY控制，top设为0 */
+            top: 0; 
+        }
+
+        /* 错误抖动动画 */
+        @keyframes shake-wrong {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        .shake-error {
+            animation: shake-wrong 0.4s ease-in-out;
         }
 
         .blank-box {
@@ -79,6 +89,7 @@
 
     <main id="main-container" class="w-full max-w-4xl p-2 relative flex flex-col items-center">
         
+        <!-- 首页 -->
         <div id="view-home" class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-2 py-4">
             <div class="bg-pink-50 p-5 rounded-[2rem] border-4 border-pink-100 flex flex-col items-center gap-3">
                 <h3 class="text-xl font-black text-pink-600">🎨 单元一</h3>
@@ -106,6 +117,7 @@
             </div>
         </div>
 
+        <!-- 游戏区域 -->
         <div id="view-game" class="hidden w-full flex flex-col items-center relative py-4">
             <div id="game-question" class="text-2xl font-bold text-gray-700 mb-4 text-center z-10 px-2"></div>
             <div id="game-stage" class="w-full flex-grow relative flex flex-col items-center justify-center min-h-[220px] mb-4 bg-white/40 rounded-3xl border-2 border-dashed border-gray-200 overflow-hidden"></div>
@@ -113,6 +125,7 @@
             <button id="btn-submit" onclick="checkAnswer()" class="hidden my-4 bg-green-500 text-white px-12 py-3 rounded-full text-xl font-bold shadow-xl active:scale-95 transition">提交答案</button>
         </div>
 
+        <!-- 完成界面 -->
         <div id="view-complete" class="hidden w-full flex flex-col items-center py-10 text-center">
             <div class="text-9xl mb-6">🏆</div>
             <h2 class="text-4xl font-black text-orange-500 mb-4">挑战成功！</h2>
@@ -120,6 +133,7 @@
             <button onclick="goHome()" class="bg-blue-500 text-white px-10 py-4 rounded-full text-2xl font-bold shadow-lg">回主页</button>
         </div>
 
+        <!-- 反馈层 -->
         <div id="overlay-feedback" class="hidden absolute inset-0 bg-white/95 rounded-3xl flex flex-col items-center justify-center z-[110]">
             <div id="feedback-emoji" class="text-8xl mb-4">🎉</div>
             <h3 id="feedback-msg" class="text-3xl font-bold mb-6">真棒！</h3>
@@ -143,7 +157,8 @@
 
         let currentUnit = 0, currentGame = 0, questionPool = [], currentTarget = null, userAnswer = [null, null], shootingInterval = null;
         let audioCtx = null, musicStarted = false;
-        let balloonsSpawnedSinceCorrect = 0; // 记录射击游戏中自上次正确答案后生成的气球数
+        let balloonsSpawnedSinceCorrect = 0; 
+        let isShootingStarted = false; 
 
         // --- 音频系统 ---
         function startBGM() {
@@ -176,6 +191,7 @@
         // --- 核心流程 ---
         function goHome() {
             clearInterval(shootingInterval);
+            isShootingStarted = false;
             document.getElementById('view-home').classList.remove('hidden');
             document.getElementById('view-game').classList.add('hidden');
             document.getElementById('view-complete').classList.add('hidden');
@@ -184,6 +200,7 @@
 
         function startUnit(unit, game) {
             currentUnit = unit; currentGame = game;
+            isShootingStarted = false;
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-game').classList.remove('hidden');
             document.getElementById('view-complete').classList.add('hidden');
@@ -312,10 +329,15 @@
                 } else {
                     qText.innerHTML = `射击游戏：点一点<br><span class="text-orange-600 text-5xl font-black">${CHINESE_NUMS[data]}</span>`;
                     currentTarget = data; stage.classList.add('bg-blue-50');
-                    const over = document.createElement('div');
-                    over.className = "absolute inset-0 flex items-center justify-center bg-blue-50/80 z-20";
-                    over.innerHTML = `<button onclick="startShooting(this)" class="play-icon-btn bg-white p-8 rounded-full shadow-2xl border-4 border-blue-100"><svg viewBox="0 0 24 24" width="80" height="80" fill="#3b82f6"><path d="M8 5v14l11-7z"/></svg></button>`;
-                    stage.appendChild(over);
+                    
+                    if (isShootingStarted) {
+                        startShootingLogic(stage);
+                    } else {
+                        const over = document.createElement('div');
+                        over.className = "absolute inset-0 flex items-center justify-center bg-blue-50/80 z-20";
+                        over.innerHTML = `<button onclick="startShootingManual(this)" class="play-icon-btn bg-white p-8 rounded-full shadow-2xl border-4 border-blue-100"><svg viewBox="0 0 24 24" width="80" height="80" fill="#3b82f6"><path d="M8 5v14l11-7z"/></svg></button>`;
+                        stage.appendChild(over);
+                    }
                 }
             }
         }
@@ -367,12 +389,16 @@
         }
 
         // --- 射击逻辑 ---
-        function startShooting(btn) {
+        function startShootingManual(btn) {
             btn.parentElement.remove();
+            isShootingStarted = true;
+            startShootingLogic(document.getElementById('game-stage'));
+        }
+
+        function startShootingLogic(parent) {
             balloonsSpawnedSinceCorrect = 0;
-            // 立即开始发射
-            createBalloon(document.getElementById('game-stage'));
-            shootingInterval = setInterval(() => createBalloon(document.getElementById('game-stage')), 2200);
+            createBalloon(parent);
+            shootingInterval = setInterval(() => createBalloon(parent), 2200);
         }
 
         function createBalloon(parent) {
@@ -380,10 +406,9 @@
             
             balloonsSpawnedSinceCorrect++;
             let val;
-            // 逻辑：如果已经出了3个错的，第4个强制出对的；或者 25% 概率出对的
             if (balloonsSpawnedSinceCorrect >= 4 || Math.random() < 0.25) {
                 val = currentTarget;
-                balloonsSpawnedSinceCorrect = 0; // 重置计数
+                balloonsSpawnedSinceCorrect = 0; 
             } else {
                 val = Math.floor(Math.random() * 10) + 11;
                 while(val === currentTarget) val = Math.floor(Math.random() * 10) + 11;
@@ -393,7 +418,19 @@
             const balloon = document.createElement('div');
             balloon.className = "target-item";
             balloon.style.left = Math.random() * (parent.clientWidth - 90) + 'px';
-            balloon.innerHTML = `<div class="relative w-[90px] h-[110px] flex items-center justify-center"><svg viewBox="0 0 100 120" class="absolute inset-0 drop-shadow-md"><ellipse cx="50" cy="50" rx="45" ry="50" fill="${colors[Math.floor(Math.random()*5)]}" /><path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none"/></svg><span class="relative text-2xl font-bold text-white">${val}</span></div>`;
+            
+            // 初始 SVG HTML
+            const getBalloonHTML = (fillColor, content) => `
+                <div class="relative w-[90px] h-[110px] flex items-center justify-center">
+                    <svg viewBox="0 0 100 120" class="absolute inset-0 drop-shadow-md">
+                        <ellipse cx="50" cy="50" rx="45" ry="50" fill="${fillColor}" />
+                        <path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none"/>
+                    </svg>
+                    <span class="relative text-2xl font-bold text-white">${content}</span>
+                </div>
+            `;
+
+            balloon.innerHTML = getBalloonHTML(colors[Math.floor(Math.random()*5)], val);
             
             balloon.onpointerdown = (e) => {
                 e.preventDefault(); e.stopPropagation();
@@ -401,12 +438,27 @@
                     balloon.innerHTML = "<div class='text-4xl'>💥</div>"; 
                     setTimeout(() => checkAnswer(true), 400); 
                 } else {
-                    balloon.style.transform = "translateX(10px)";
-                    setTimeout(() => balloon.style.transform = "", 100);
+                    // 错误反馈效果：变红、显示❌、剧烈抖动
+                    const currentFill = balloon.querySelector('ellipse').getAttribute('fill');
+                    balloon.innerHTML = `
+                        <div class="relative w-[90px] h-[110px] flex items-center justify-center">
+                            <svg viewBox="0 0 100 120" class="absolute inset-0 drop-shadow-md">
+                                <ellipse cx="50" cy="50" rx="45" ry="50" fill="#9ca3af" />
+                                <path d="M20 20 L80 80 M80 20 L20 80" stroke="#ef4444" stroke-width="12" />
+                                <path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none"/>
+                            </svg>
+                            <span class="relative text-2xl font-bold text-white">${val}</span>
+                        </div>
+                    `;
+                    balloon.classList.add('shake-error');
+                    playSound('wrong');
+                    // 0.5秒后恢复或者让它继续飞
+                    setTimeout(() => {
+                        balloon.classList.remove('shake-error');
+                    }, 500);
                 }
             };
             parent.appendChild(balloon);
-            // 确保气球飞过屏幕边界后自动移除
             setTimeout(() => balloon.remove(), 12000);
         }
 
