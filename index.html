@@ -19,6 +19,8 @@
             width: 100vw;
             display: flex;
             flex-direction: column;
+            /* 阻止下拉刷新和滑动导航，防止意外退出全屏 */
+            overscroll-behavior: none;
         }
 
         /* 16:9 核心容器 */
@@ -52,7 +54,7 @@
             position: absolute; cursor: pointer;
             animation: balloon-float 6s linear forwards;
             z-index: 30; pointer-events: auto;
-            bottom: 0; /* 从底部开始计算 translateY */
+            bottom: 0; 
         }
 
         .blank-box {
@@ -123,7 +125,7 @@
         .header-btn:hover { background: #e2e8f0; }
     </style>
 </head>
-<body>
+<body onclick="startBGM()">
 
     <canvas id="canvas-confetti" class="celebration-canvas"></canvas>
 
@@ -183,7 +185,7 @@
                         <button onclick="startUnit(6, 1)" class="game-card bg-rose-500 text-white py-3 rounded-xl text-xs font-bold shadow-sm">11-20加法</button>
                     </div>
                 </div>
-                <div class="h-24 col-span-full"></div> <!-- 增加底部填充确保滚动 -->
+                <div class="h-24 col-span-full"></div>
             </div>
 
             <!-- 游戏区域 -->
@@ -229,7 +231,7 @@
         const CHINESE_NUMS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十"];
 
         let currentUnit = 0, currentGame = 0, questionPool = [], currentTarget = null, userAnswer = [null, null], shootingInterval = null;
-        let audioCtx = null, musicStarted = false, isMuted = false, gainNode = null;
+        let musicStarted = false, isMuted = false, bgmAudio = null;
         let balloonsSpawnedSinceCorrect = 0, isShootingStarted = false;
 
         function toggleFullScreen() {
@@ -238,16 +240,24 @@
                     document.getElementById('fs-btn').innerText = "退出全屏";
                 }).catch(err => { console.log(`全屏失败: ${err.message}`); });
             } else {
-                document.exitFullscreen().then(() => {
-                    document.getElementById('fs-btn').innerText = "📺 全屏";
-                });
+                document.exitFullscreen();
             }
         }
 
+        // 监听全屏状态变化，防止意外退出时按钮文字不统一
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('fs-btn');
+            if (!document.fullscreenElement) {
+                btn.innerText = "📺 全屏";
+            } else {
+                btn.innerText = "退出全屏";
+            }
+        });
+
         function toggleMusic() {
-            if (!musicStarted) { startBGM(); return; }
+            if (!bgmAudio) { startBGM(); return; }
             isMuted = !isMuted;
-            if(gainNode) gainNode.gain.setTargetAtTime(isMuted ? 0 : 0.05, audioCtx.currentTime, 0.1);
+            bgmAudio.muted = isMuted;
             document.getElementById('music-toggle').innerText = isMuted ? '🔇' : '🎵';
         }
 
@@ -255,25 +265,15 @@
             if (musicStarted) return;
             musicStarted = true;
             try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                gainNode = audioCtx.createGain();
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.connect(audioCtx.destination);
-                const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
-                let step = 0;
-                setInterval(() => {
-                    if (isMuted) return;
-                    const osc = audioCtx.createOscillator();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
-                    const g = audioCtx.createGain();
-                    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
-                    osc.connect(g); g.connect(gainNode);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.8);
-                    step++;
-                }, 600);
-            } catch(e) { console.error("Audio BGM Error", e); }
+                // 使用 GitHub 上的背景音乐，自动循环播放
+                bgmAudio = new Audio('https://raw.githubusercontent.com/your-username/your-repo/main/backgroundmusic.mp3'); // 请替换为实际的 GitHub raw 链接
+                bgmAudio.loop = true;
+                bgmAudio.volume = 0.4;
+                bgmAudio.play().catch(e => {
+                    console.log("音频自动播放被拦截，等待下次交互");
+                    musicStarted = false;
+                });
+            } catch(e) { console.error("Audio Error", e); }
         }
 
         function playVoice(text) {
@@ -299,7 +299,7 @@
             document.getElementById('view-complete').style.display = 'none';
             generatePool();
             loadNextQuestion();
-            if (!musicStarted) startBGM();
+            startBGM(); // 交互时尝试启动音乐
         }
 
         function generatePool() {
@@ -381,12 +381,22 @@
                     else if(data==='AAB'){ seq=[itemA,itemA,itemB,itemA,itemA]; ans=itemB; }
                     else if(data==='ABA'){ seq=[itemA,itemB,itemA,itemB,itemA]; ans=itemB; }
                     else { seq=[itemA,itemA,itemB,itemB,itemA,itemA]; ans=itemB; }
+                    
                     currentTarget = getID(ans);
                     const seqDiv = document.createElement('div'); seqDiv.className = "flex flex-wrap justify-center gap-2 bg-white p-3 rounded-2xl border";
                     seq.forEach(it => seqDiv.innerHTML += getTag(it));
                     seqDiv.innerHTML += `<div class="w-8 h-8 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-300 font-bold">?</div>`;
                     stage.appendChild(seqDiv);
-                    [ans, itemA].sort(()=>Math.random()-0.5).forEach(it => opts.appendChild(createItemCard(getTag(it), () => checkAnswer(getID(it) === currentTarget))));
+                    
+                    // 修复：确保正确答案和干扰项不同
+                    let wrongCandidate = (getID(itemA) === currentTarget) ? itemB : itemA;
+                    if (getID(wrongCandidate) === currentTarget) {
+                        // 如果干扰项还是和答案一样，随机选一个不一样的
+                        const otherIcons = ICONS.filter(i => i !== currentTarget);
+                        wrongCandidate = otherIcons[Math.floor(Math.random() * otherIcons.length)];
+                    }
+
+                    [ans, wrongCandidate].sort(()=>Math.random()-0.5).forEach(it => opts.appendChild(createItemCard(getTag(it), () => checkAnswer(getID(it) === currentTarget))));
                 }
             } else if (currentUnit === 2) {
                 if (currentGame === 1) {
@@ -579,11 +589,9 @@
             if(val === currentTarget) balloonsSpawnedSinceCorrect = 0;
             const b = document.createElement('div'); b.className = "target-item"; 
             b.style.left = Math.random() * (parent.clientWidth - 70) + 'px';
-            // 重要修复：让气球始终从容器底部的可见区域开始动画
             b.innerHTML = `<div class="relative w-[60px] h-[80px] flex items-center justify-center"><svg viewBox="0 0 100 120" class="absolute inset-0 drop-shadow-md"><ellipse cx="50" cy="50" rx="45" ry="50" fill="hsl(${Math.random()*360},70%,60%)" /><path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none" /></svg><span class="relative text-xl font-bold text-white">${val}</span></div>`;
             b.onpointerdown = (e) => { e.preventDefault(); if(val === currentTarget) { b.innerHTML = "<div class='text-5xl'>💥</div>"; setTimeout(() => checkAnswer(true), 400); } else { b.remove(); playVoice("再试一次"); } };
             parent.appendChild(b); 
-            // 6秒后移除气球，对应 CSS 动画时长
             setTimeout(() => { if(b.parentNode === parent) b.remove(); }, 6000);
         }
 
