@@ -265,15 +265,16 @@
             if (musicStarted) return;
             musicStarted = true;
             try {
-                // 使用 GitHub 上的背景音乐，自动循环播放
-                bgmAudio = new Audio('https://raw.githubusercontent.com/your-username/your-repo/main/backgroundmusic.mp3'); // 请替换为实际的 GitHub raw 链接
+                // 加载 GitHub 上的 backgroundmusic.mp3
+                // 如果 HTML 和 MP3 在同一 GitHub 目录下，直接写文件名即可
+                bgmAudio = new Audio('backgroundmusic.mp3'); 
                 bgmAudio.loop = true;
                 bgmAudio.volume = 0.4;
                 bgmAudio.play().catch(e => {
-                    console.log("音频自动播放被拦截，等待下次交互");
-                    musicStarted = false;
+                    console.log("浏览器限制自动播放，请先点击页面。");
+                    musicStarted = false; // 允许下次交互再次尝试播放
                 });
-            } catch(e) { console.error("Audio Error", e); }
+            } catch(e) { console.error("音频初始化错误", e); }
         }
 
         function playVoice(text) {
@@ -299,7 +300,7 @@
             document.getElementById('view-complete').style.display = 'none';
             generatePool();
             loadNextQuestion();
-            startBGM(); // 交互时尝试启动音乐
+            startBGM(); // 点击单元时尝试启动音乐
         }
 
         function generatePool() {
@@ -388,10 +389,9 @@
                     seqDiv.innerHTML += `<div class="w-8 h-8 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-300 font-bold">?</div>`;
                     stage.appendChild(seqDiv);
                     
-                    // 修复：确保正确答案和干扰项不同
+                    // 确保干扰项不同
                     let wrongCandidate = (getID(itemA) === currentTarget) ? itemB : itemA;
                     if (getID(wrongCandidate) === currentTarget) {
-                        // 如果干扰项还是和答案一样，随机选一个不一样的
                         const otherIcons = ICONS.filter(i => i !== currentTarget);
                         wrongCandidate = otherIcons[Math.floor(Math.random() * otherIcons.length)];
                     }
