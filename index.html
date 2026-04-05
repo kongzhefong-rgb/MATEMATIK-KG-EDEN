@@ -81,7 +81,7 @@
             position: relative; z-index: 10;
         }
         .bond-whole { background: #fee2e2; border: 3px solid #f87171; color: #b91c1c; }
-        .bond-part { background: #e0f2fe; border: 3px solid #38bdf8; color: #0369a1; }
+        .bond-part { background: #e0f2fe; border: 4px solid #38bdf8; color: #0369a1; }
         
         /* 11-20 加法火车 Part + Part = Whole */
         .train-container { display: flex; align-items: flex-end; gap: 0; transform-origin: center; }
@@ -100,20 +100,22 @@
         .train-wheel { width: 20px; height: 20px; background: #334155; border-radius: 50%; border: 2px solid #94a3b8; position: absolute; bottom: -10px; }
 
         /* 布局分配，确保不吃屏 */
-        header { height: 50px; flex-shrink: 0; }
+        header { height: 50px; flex-shrink: 0; background: white; }
         #game-question { height: 12%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         #game-stage { height: 58%; width: 100%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         #game-options { height: 30%; width: 100%; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 5px; flex-shrink: 0; }
 
         #view-home { height: 100%; overflow-y: auto; padding: 10px; display: grid; grid-template-cols: repeat(3, 1fr); gap: 10px; }
         @media (max-width: 600px) { #view-home { grid-template-cols: repeat(2, 1fr); } }
+        
+        .hidden-screen { display: none !important; }
     </style>
 </head>
 <body>
 
     <canvas id="canvas-confetti" class="celebration-canvas"></canvas>
 
-    <header class="w-full px-4 flex justify-between items-center bg-white shadow-sm z-50">
+    <header class="w-full px-4 flex justify-between items-center shadow-sm z-50">
         <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
             <span class="text-xl">🏠</span>
             <h1 class="text-lg font-bold text-blue-600">数字乐园</h1>
@@ -125,7 +127,7 @@
         <main id="main-container" class="h-full flex flex-col">
             
             <!-- 首页 -->
-            <div id="view-home" class="w-full">
+            <div id="view-home">
                 <div class="bg-pink-50 p-3 rounded-2xl border-2 border-pink-100 flex flex-col items-center gap-2">
                     <h3 class="text-xs font-black text-pink-600">颜色与形状</h3>
                     <div class="flex flex-col w-full gap-1">
@@ -170,7 +172,7 @@
             </div>
 
             <!-- 游戏区域 -->
-            <div id="view-game" class="hidden">
+            <div id="view-game" style="display: none;" class="h-full flex-col">
                 <div id="game-question"></div>
                 <div id="game-stage"></div>
                 <div id="game-options"></div>
@@ -178,7 +180,7 @@
             </div>
 
             <!-- 完成界面 -->
-            <div id="view-complete" class="hidden h-full flex flex-col items-center justify-center text-center p-4">
+            <div id="view-complete" style="display: none;" class="h-full flex-col items-center justify-center text-center p-4">
                 <div class="text-6xl mb-2">🏆</div>
                 <h2 class="text-2xl font-black text-orange-500">太棒了！</h2>
                 <p class="text-gray-500 text-sm mb-4">你完成了本单元所有练习！</p>
@@ -186,7 +188,7 @@
             </div>
 
             <!-- 反馈层 -->
-            <div id="overlay-feedback" class="hidden absolute inset-0 bg-white/95 flex flex-col items-center justify-center z-[110]">
+            <div id="overlay-feedback" style="display: none;" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center z-[110]">
                 <div id="feedback-emoji" class="text-7xl mb-2">🎉</div>
                 <h3 id="feedback-msg" class="text-2xl font-bold mb-4 text-green-600">真棒！</h3>
                 <button onclick="loadNextQuestion()" class="bg-blue-500 text-white px-10 py-2 rounded-full font-bold shadow-lg">下一题</button>
@@ -223,24 +225,26 @@
         function startBGM() {
             if (musicStarted) return;
             musicStarted = true;
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            gainNode = audioCtx.createGain();
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gainNode.connect(audioCtx.destination);
-            const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
-            let step = 0;
-            setInterval(() => {
-                if (isMuted) return;
-                const osc = audioCtx.createOscillator();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
-                const g = audioCtx.createGain();
-                g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
-                osc.connect(g); g.connect(gainNode);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.8);
-                step++;
-            }, 600);
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioCtx.createGain();
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.connect(audioCtx.destination);
+                const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
+                let step = 0;
+                setInterval(() => {
+                    if (isMuted) return;
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+                    const g = audioCtx.createGain();
+                    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+                    osc.connect(g); g.connect(gainNode);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+                    step++;
+                }, 600);
+            } catch(e) { console.error("Audio BGM Error", e); }
         }
 
         function playVoice(text) {
@@ -252,18 +256,17 @@
         function goHome() {
             clearInterval(shootingInterval);
             isShootingStarted = false;
-            document.getElementById('view-home').classList.remove('hidden');
-            document.getElementById('view-game').classList.add('hidden');
-            document.getElementById('view-complete').classList.add('hidden');
+            document.getElementById('view-home').style.display = 'grid';
+            document.getElementById('view-game').style.display = 'none';
+            document.getElementById('view-complete').style.display = 'none';
         }
 
         function startUnit(unit, game) {
             currentUnit = unit; currentGame = game;
             isShootingStarted = false;
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-game').classList.remove('hidden');
-            document.getElementById('view-game').classList.add('flex');
-            document.getElementById('view-complete').classList.add('hidden');
+            document.getElementById('view-home').style.display = 'none';
+            document.getElementById('view-game').style.display = 'flex';
+            document.getElementById('view-complete').style.display = 'none';
             generatePool();
             loadNextQuestion();
             if (!musicStarted) startBGM();
@@ -292,15 +295,14 @@
 
         function loadNextQuestion() {
             clearInterval(shootingInterval);
-            document.getElementById('overlay-feedback').classList.add('hidden');
+            document.getElementById('overlay-feedback').style.display = 'none';
             const stage = document.getElementById('game-stage');
             stage.innerHTML = ''; stage.classList.remove('bg-blue-50');
             document.getElementById('game-options').innerHTML = '';
             document.getElementById('btn-submit').classList.add('hidden');
             if (questionPool.length === 0) {
-                document.getElementById('view-game').classList.add('hidden');
-                document.getElementById('view-game').classList.remove('flex');
-                document.getElementById('view-complete').classList.remove('hidden');
+                document.getElementById('view-game').style.display = 'none';
+                document.getElementById('view-complete').style.display = 'flex';
                 return;
             }
             renderQuestion(questionPool.pop());
@@ -404,7 +406,6 @@
                     const train = document.createElement('div'); train.className = "train-container";
                     train.innerHTML = `<div class="train-car"><span>${a}</span><div class="train-wheel" style="left:12px"></div><div class="train-wheel" style="right:12px"></div></div><div class="train-hook"></div><div class="train-car" style="${hideType===1?'background:#fffbeb;border-style:dashed':''}"><span>${hideType===1?'?':b}</span><div class="train-wheel" style="left:12px"></div><div class="train-wheel" style="right:12px"></div></div><div class="train-hook"></div><div class="train-engine"><div class="text-[8px] font-bold opacity-80">总和</div><div class="text-xl font-black">${hideType===0?'?':sum}</div><div class="train-wheel" style="left:8px"></div><div class="train-wheel" style="right:8px"></div></div>`;
                     
-                    // 根据高度自动缩放火车
                     const scale = Math.min(1.2, stage.clientHeight / 180);
                     train.style.transform = `scale(${scale})`;
                     
@@ -441,7 +442,7 @@
         function checkAnswer(isCorrect = false) {
             if (currentUnit === 3 && currentGame === 2) isCorrect = userAnswer[0] === currentTarget[0] && userAnswer[1] === currentTarget[1];
             if (isCorrect) {
-                document.getElementById('overlay-feedback').classList.remove('hidden');
+                document.getElementById('overlay-feedback').style.display = 'flex';
                 playVoice(Math.random() > 0.5 ? "非常好" : "真棒");
                 startConfetti();
             } else { playVoice("再试一次"); }
