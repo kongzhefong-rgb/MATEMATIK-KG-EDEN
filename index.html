@@ -19,22 +19,25 @@
             width: 100vw;
             display: flex;
             flex-direction: column;
-            /* 阻止下拉刷新和滑动导航，防止意外退出全屏 */
             overscroll-behavior: none;
         }
 
-        /* 16:9 核心容器 */
+        /* 核心容器 */
         #main-wrapper {
             flex: 1;
             width: 100%;
-            max-width: 177.78vh; 
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             background: white;
             position: relative;
             overflow: hidden;
+            transition: all 0.2s ease;
         }
+
+        /* 应用最大化模式逻辑 */
+        body.maximized header { display: none; }
+        body.maximized #main-wrapper { height: 100vh; }
 
         .game-card { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .game-card:active { transform: scale(0.95); }
@@ -44,10 +47,9 @@
             pointer-events: none; z-index: 100;
         }
 
-        /* 修复气球动画：使用相对于父容器的坐标 */
         @keyframes balloon-float {
             0% { transform: translateY(120%); opacity: 1; }
-            100% { transform: translateY(-500px); opacity: 1; }
+            100% { transform: translateY(-700px); opacity: 1; }
         }
 
         .target-item {
@@ -57,72 +59,63 @@
             bottom: 0; 
         }
 
+        /* 方框与拖拽项增大 */
         .blank-box {
-            width: 50px; height: 50px;
+            width: 65px; height: 65px;
             border: 3px dashed #cbd5e1;
             display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 10px; background: #fff;
-            margin: 0 4px; font-size: 1.5rem; font-weight: bold;
+            border-radius: 14px; background: #fff;
+            margin: 0 8px; font-size: 2rem; font-weight: bold;
             color: #3b82f6; cursor: pointer;
             transition: all 0.2s;
         }
         .blank-box.filled { border-style: solid; border-color: #3b82f6; background: #eff6ff; }
-        .blank-box:active { transform: scale(0.9); opacity: 0.8; }
 
         .drag-item {
-            width: 50px; height: 50px;
+            width: 60px; height: 60px;
             background: #fff; border: 2px solid #3b82f6;
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 1.4rem; color: #3b82f6;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.8rem; color: #3b82f6;
             cursor: grab; touch-action: none; z-index: 50;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .bond-circle {
-            width: 70px; height: 70px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; font-weight: 900;
-            position: relative; z-index: 10;
-        }
-        .bond-whole { background: #fee2e2; border: 3px solid #f87171; color: #b91c1c; }
-        .bond-part { background: #e0f2fe; border: 3px solid #38bdf8; color: #0369a1; }
-        
+        /* 火车容器优化 */
         .train-container { display: flex; align-items: flex-end; gap: 0; transform-origin: center; }
         .train-engine { 
-            width: 100px; height: 80px; background: #ef4444; border-radius: 40px 20px 10px 10px;
+            width: 120px; height: 100px; background: #ef4444; border-radius: 40px 20px 10px 10px;
             position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: white; border: 3px solid #b91c1c;
         }
-        .train-engine::after { content: ''; position: absolute; top: -12px; right: 15px; width: 25px; height: 15px; background: #475569; border-radius: 4px; }
         .train-car {
-            width: 80px; height: 65px; background: #fbbf24; border: 3px solid #d97706; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: bold; color: #92400e;
+            width: 100px; height: 85px; background: #fbbf24; border: 3px solid #d97706; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; color: #92400e;
             position: relative;
         }
-        .train-hook { width: 16px; height: 16px; background: #94a3b8; border-radius: 50%; margin-bottom: 20px; border: 2px solid #64748b; z-index: 1; }
-        .train-wheel { width: 20px; height: 20px; background: #334155; border-radius: 50%; border: 2px solid #94a3b8; position: absolute; bottom: -10px; }
+        .train-hook { width: 20px; height: 20px; background: #94a3b8; border-radius: 50%; margin-bottom: 30px; border: 2px solid #64748b; }
+        .train-wheel { width: 24px; height: 24px; background: #334155; border-radius: 50%; border: 2px solid #94a3b8; position: absolute; bottom: -12px; }
 
         header { height: 50px; flex-shrink: 0; background: white; border-bottom: 1px solid #eee; }
         
         #view-game { display: none; height: 100%; flex-direction: column; width: 100%; }
-        #game-question { height: 10%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; font-weight: 900; }
-        #game-stage { height: 55%; width: 100%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         
-        #game-options-container { height: 35%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; background: #fafafa; }
-        #game-options { width: 100%; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
+        /* 针对 iPad 的高度分配：重点扩大 Stage */
+        #game-question { height: 8%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; font-weight: 900; color: #1e293b; }
+        #game-stage { height: 65%; width: 100%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 10px; }
+        #game-options-container { height: 27%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; flex-shrink: 0; background: #f8fafc; border-top: 2px solid #f1f5f9; }
         
-        #btn-submit { margin-top: 10px; flex-shrink: 0; }
+        #game-options { width: 100%; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; }
+        #btn-submit { margin-top: 8px; flex-shrink: 0; }
 
         #main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-        #view-home { padding: 15px; display: grid; grid-template-cols: repeat(3, 1fr); gap: 15px; width: 100%; box-sizing: border-box; }
-        @media (max-width: 600px) { #view-home { grid-template-cols: repeat(2, 1fr); } }
+        #view-home { padding: 25px; display: grid; grid-template-cols: repeat(3, 1fr); gap: 25px; width: 100%; box-sizing: border-box; }
+        @media (max-width: 800px) { #view-home { grid-template-cols: repeat(2, 1fr); } }
 
         .header-btn {
-            background: #f1f5f9; border-radius: 8px; padding: 4px 12px; font-weight: bold; font-size: 14px;
-            color: #475569; cursor: pointer; transition: background 0.2s;
+            background: #f1f5f9; border-radius: 10px; padding: 6px 16px; font-weight: bold; font-size: 14px;
+            color: #475569; cursor: pointer; transition: background 0.2s; border: 1px solid #e2e8f0;
         }
-        .header-btn:hover { background: #e2e8f0; }
+        .header-btn:active { background: #cbd5e1; }
     </style>
 </head>
 <body onclick="startBGM()">
@@ -135,7 +128,7 @@
             <h1 class="text-lg font-bold text-blue-600">数字乐园</h1>
         </div>
         <div class="flex items-center gap-4">
-            <button class="header-btn" id="fs-btn" onclick="toggleFullScreen()">📺 全屏</button>
+            <button class="header-btn" id="max-btn" onclick="toggleMaximize()">📺 应用最大化</button>
             <div id="music-toggle" onclick="toggleMusic()" class="text-2xl cursor-pointer">🎵</div>
         </div>
     </header>
@@ -143,6 +136,7 @@
     <div id="main-wrapper">
         <main id="main-container">
             
+            <!-- 首页内容 -->
             <div id="view-home">
                 <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-100 flex flex-col items-center gap-3">
                     <h3 class="text-sm font-black text-pink-600">颜色与形状</h3>
@@ -194,23 +188,23 @@
                 <div id="game-stage"></div>
                 <div id="game-options-container">
                     <div id="game-options"></div>
-                    <button id="btn-submit" onclick="checkAnswer()" class="hidden bg-green-500 text-white px-10 py-2 rounded-full font-bold shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1">提交答案</button>
+                    <button id="btn-submit" onclick="checkAnswer()" class="hidden bg-green-500 text-white px-14 py-4 rounded-full font-bold shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 text-lg">确认提交</button>
                 </div>
             </div>
 
             <!-- 完成界面 -->
             <div id="view-complete" style="display: none;" class="h-full flex flex-col items-center justify-center text-center p-4 w-full">
-                <div class="text-6xl mb-2">🏆</div>
-                <h2 class="text-2xl font-black text-orange-500">太棒了！</h2>
-                <p class="text-gray-500 text-sm mb-4">你完成了本单元所有练习！</p>
-                <button onclick="goHome()" class="bg-blue-500 text-white px-8 py-2 rounded-full font-bold shadow-lg">回主页</button>
+                <div class="text-7xl mb-4">🏆</div>
+                <h2 class="text-4xl font-black text-orange-500 mb-2">太棒了！</h2>
+                <p class="text-gray-500 text-lg mb-8">你完成了本单元所有练习！</p>
+                <button onclick="goHome()" class="bg-blue-500 text-white px-12 py-4 rounded-full font-bold shadow-lg text-xl">回主页</button>
             </div>
 
             <!-- 反馈层 -->
             <div id="overlay-feedback" style="display: none;" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center z-[110]">
-                <div id="feedback-emoji" class="text-7xl mb-2">🎉</div>
-                <h3 id="feedback-msg" class="text-2xl font-bold mb-4 text-green-600">真棒！</h3>
-                <button onclick="loadNextQuestion()" class="bg-blue-500 text-white px-10 py-2 rounded-full font-bold shadow-lg">下一题</button>
+                <div id="feedback-emoji" class="text-9xl mb-4">🎉</div>
+                <h3 id="feedback-msg" class="text-4xl font-bold mb-8 text-green-600">真棒！</h3>
+                <button onclick="loadNextQuestion()" class="bg-blue-500 text-white px-14 py-4 rounded-full font-bold shadow-lg text-xl">下一题</button>
             </div>
         </main>
     </div>
@@ -231,28 +225,14 @@
         const CHINESE_NUMS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十"];
 
         let currentUnit = 0, currentGame = 0, questionPool = [], currentTarget = null, userAnswer = [null, null], shootingInterval = null;
-        let musicStarted = false, isMuted = false, bgmAudio = null;
+        let musicStarted = false, isMuted = false, bgmAudio = null, isMaximized = false;
         let balloonsSpawnedSinceCorrect = 0, isShootingStarted = false;
 
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => {
-                    document.getElementById('fs-btn').innerText = "退出全屏";
-                }).catch(err => { console.log(`全屏失败: ${err.message}`); });
-            } else {
-                document.exitFullscreen();
-            }
+        function toggleMaximize() {
+            isMaximized = !isMaximized;
+            document.body.classList.toggle('maximized', isMaximized);
+            document.getElementById('max-btn').innerText = isMaximized ? "退出最大化" : "📺 应用最大化";
         }
-
-        // 监听全屏状态变化，防止意外退出时按钮文字不统一
-        document.addEventListener('fullscreenchange', () => {
-            const btn = document.getElementById('fs-btn');
-            if (!document.fullscreenElement) {
-                btn.innerText = "📺 全屏";
-            } else {
-                btn.innerText = "退出全屏";
-            }
-        });
 
         function toggleMusic() {
             if (!bgmAudio) { startBGM(); return; }
@@ -265,15 +245,10 @@
             if (musicStarted) return;
             musicStarted = true;
             try {
-                // 加载 GitHub 上的 backgroundmusic.mp3
-                // 如果 HTML 和 MP3 在同一 GitHub 目录下，直接写文件名即可
                 bgmAudio = new Audio('backgroundmusic.mp3'); 
                 bgmAudio.loop = true;
                 bgmAudio.volume = 0.4;
-                bgmAudio.play().catch(e => {
-                    console.log("浏览器限制自动播放，请先点击页面。");
-                    musicStarted = false; // 允许下次交互再次尝试播放
-                });
+                bgmAudio.play().catch(() => { musicStarted = false; });
             } catch(e) { console.error("音频初始化错误", e); }
         }
 
@@ -300,7 +275,7 @@
             document.getElementById('view-complete').style.display = 'none';
             generatePool();
             loadNextQuestion();
-            startBGM(); // 点击单元时尝试启动音乐
+            startBGM();
         }
 
         function generatePool() {
@@ -366,16 +341,16 @@
                     qText.innerText = data.name; currentTarget = data.id;
                     const group = shuffle([...SHAPES]).slice(0, 4);
                     if (!group.find(s => s.id === data.id)) group[0] = data;
-                    const grid = document.createElement('div'); grid.className = "flex gap-4";
-                    shuffle(group).forEach(s => grid.appendChild(createItemCard(getShapeSVG(s, 70), () => checkAnswer(s.id === currentTarget))));
+                    const grid = document.createElement('div'); grid.className = "flex gap-10";
+                    shuffle(group).forEach(s => grid.appendChild(createItemCard(getShapeSVG(s, 110), () => checkAnswer(s.id === currentTarget))));
                     stage.appendChild(grid);
                 } else {
-                    qText.innerText = "下一个是什么？";
+                    qText.innerText = "下一个是什么形状？";
                     const itemA = Math.random() > 0.5 ? SHAPES[Math.floor(Math.random()*SHAPES.length)] : ICONS[Math.floor(Math.random()*ICONS.length)];
                     let itemB = Math.random() > 0.5 ? SHAPES[Math.floor(Math.random()*SHAPES.length)] : ICONS[Math.floor(Math.random()*ICONS.length)];
                     while((itemA.id && itemB.id && itemA.id === itemB.id) || (itemA === itemB)) itemB = ICONS[Math.floor(Math.random()*ICONS.length)];
                     let seq = [], ans;
-                    const getTag = (it) => it.id ? getShapeSVG(it, 35) : `<span class="text-2xl">${it}</span>`;
+                    const getTag = (it) => it.id ? getShapeSVG(it, 60) : `<span class="text-5xl">${it}</span>`;
                     const getID = (it) => it.id || it;
                     if(data==='AB'){ seq=[itemA,itemB,itemA,itemB]; ans=itemA; }
                     else if(data==='ABB'){ seq=[itemA,itemB,itemB,itemA,itemB]; ans=itemB; }
@@ -384,111 +359,104 @@
                     else { seq=[itemA,itemA,itemB,itemB,itemA,itemA]; ans=itemB; }
                     
                     currentTarget = getID(ans);
-                    const seqDiv = document.createElement('div'); seqDiv.className = "flex flex-wrap justify-center gap-2 bg-white p-3 rounded-2xl border";
+                    const seqDiv = document.createElement('div'); seqDiv.className = "flex flex-wrap justify-center items-center gap-6 bg-gray-50 p-8 rounded-[2rem] border-2 border-gray-100 shadow-inner";
                     seq.forEach(it => seqDiv.innerHTML += getTag(it));
-                    seqDiv.innerHTML += `<div class="w-8 h-8 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-300 font-bold">?</div>`;
+                    seqDiv.innerHTML += `<div class="w-14 h-14 border-4 border-dashed border-gray-300 rounded-xl flex items-center justify-center text-3xl text-gray-400 font-black">?</div>`;
                     stage.appendChild(seqDiv);
                     
-                    // 确保干扰项不同
                     let wrongCandidate = (getID(itemA) === currentTarget) ? itemB : itemA;
                     if (getID(wrongCandidate) === currentTarget) {
                         const otherIcons = ICONS.filter(i => i !== currentTarget);
                         wrongCandidate = otherIcons[Math.floor(Math.random() * otherIcons.length)];
                     }
-
                     [ans, wrongCandidate].sort(()=>Math.random()-0.5).forEach(it => opts.appendChild(createItemCard(getTag(it), () => checkAnswer(getID(it) === currentTarget))));
                 }
             } else if (currentUnit === 2) {
                 if (currentGame === 1) {
                     const map = { big:'大', small:'小', tall:'高', short:'矮', long:'长', short_len:'短', thick:'厚', thin:'薄' };
                     qText.innerText = map[data];
-                    const container = document.createElement('div'); container.className = "flex items-end gap-8";
-                    const itms = [ {type:'big', s:1.4}, {type:'small', s:0.7}, {type:'tall', h:120}, {type:'short', h:60}, {type:'long', w:140}, {type:'short_len', w:70}, {type:'thick', sw:10}, {type:'thin', sw:2} ];
+                    const container = document.createElement('div'); container.className = "flex items-end gap-20";
+                    const itms = [ {type:'big', s:1.8}, {type:'small', s:0.9}, {type:'tall', h:220}, {type:'short', h:110}, {type:'long', w:260}, {type:'short_len', w:120}, {type:'thick', sw:22}, {type:'thin', sw:4} ];
                     let currentPair = (['big','small'].includes(data)) ? itms.slice(0,2) : (['tall','short'].includes(data)) ? itms.slice(2,4) : (['long','short_len'].includes(data)) ? itms.slice(4,6) : itms.slice(6,8);
                     shuffle(currentPair).forEach(item => {
                         let svg = '';
-                        if(item.s) svg = `<svg width="80" height="80"><circle cx="40" cy="40" r="${28*item.s}" fill="#f87171"/></svg>`;
-                        else if(item.h) svg = `<svg width="40" height="130"><rect x="10" y="${130-item.h}" width="20" height="${item.h}" fill="#fbbf24" rx="4"/></svg>`;
-                        else if(item.w) svg = `<svg width="150" height="25"><rect x="0" y="5" width="${item.w}" height="15" fill="#60a5fa" rx="8"/></svg>`;
-                        else svg = `<svg width="80" height="80"><rect x="20" y="20" width="40" height="40" fill="white" stroke="#a78bfa" stroke-width="${item.sw}" rx="4"/></svg>`;
+                        if(item.s) svg = `<svg width="140" height="140"><circle cx="70" cy="70" r="${40*item.s}" fill="#f87171"/></svg>`;
+                        else if(item.h) svg = `<svg width="60" height="250"><rect x="10" y="${250-item.h}" width="40" height="${item.h}" fill="#fbbf24" rx="8"/></svg>`;
+                        else if(item.w) svg = `<svg width="300" height="50"><rect x="0" y="10" width="${item.w}" height="30" fill="#60a5fa" rx="15"/></svg>`;
+                        else svg = `<svg width="120" height="120"><rect x="20" y="20" width="80" height="80" fill="white" stroke="#a78bfa" stroke-width="${item.sw}" rx="10"/></svg>`;
                         container.appendChild(createItemCard(svg, () => checkAnswer(item.type === data)));
                     });
                     stage.appendChild(container);
                 } else {
                     qText.innerText = "请找一找：" + CHINESE_NUMS[data]; currentTarget = data;
-                    stage.innerHTML = `<div class="text-7xl font-black text-blue-100 opacity-20 select-none">?</div>`;
+                    stage.innerHTML = `<div class="text-[12rem] font-black text-blue-100 opacity-20 select-none">?</div>`;
                     const wrong = shuffle([1,2,3,4,5,6,7,8,9,10].filter(n => n!==data)).slice(0, 2);
-                    shuffle([data, ...wrong]).forEach(n => opts.appendChild(createItemCard(`<span class="text-3xl font-bold">${n}</span>`, () => checkAnswer(n === currentTarget))));
+                    shuffle([data, ...wrong]).forEach(n => opts.appendChild(createItemCard(`<span class="text-5xl font-black">${n}</span>`, () => checkAnswer(n === currentTarget))));
                 }
             } else if (currentUnit === 3 || (currentUnit === 4 && currentGame === 1)) {
                 if (currentGame === 1) {
                     qText.innerText = "数一数"; const ic = ICONS[Math.floor(Math.random()*ICONS.length)];
                     const gridCols = (currentUnit === 4) ? "grid-cols-10" : "grid-cols-5";
+                    const iconSize = (currentUnit === 4) ? "text-6xl" : "text-8xl"; // 显著调大
                     const grid = document.createElement('div'); 
-                    grid.className = `grid ${gridCols} gap-2 p-3 bg-white rounded-2xl border max-w-[95%]`;
-                    for(let i=0; i<data; i++) grid.innerHTML += `<span class="text-2xl flex justify-center">${ic}</span>`;
+                    grid.className = `grid ${gridCols} gap-8 p-10 bg-white rounded-[3rem] border shadow-xl max-w-[95%]`;
+                    for(let i=0; i<data; i++) grid.innerHTML += `<span class="${iconSize} flex justify-center drop-shadow-md">${ic}</span>`;
                     stage.appendChild(grid);
-                    shuffle([data, data+1, data-1].filter(n=>n>0 && n<=20)).forEach(n => opts.appendChild(createItemCard(`<span class="text-2xl font-bold">${n}</span>`, () => checkAnswer(n === data))));
+                    shuffle([data, data+1, data-1].filter(n=>n>0 && n<=20)).forEach(n => opts.appendChild(createItemCard(`<span class="text-4xl font-bold text-blue-600">${n}</span>`, () => checkAnswer(n === data))));
                 } else {
                     const isAsc = data.startsWith('asc'), dir = isAsc ? "顺序" : "逆序";
                     qText.innerHTML = `<span class="text-blue-600 font-black">${dir}</span>`;
                     const start = Math.floor(Math.random() * 5) + (isAsc ? 1 : 6);
                     let seq = []; for(let i=0; i<5; i++) seq.push(isAsc ? start + i : start - i);
                     const holes = [1, 3]; userAnswer = [null, null]; currentTarget = [seq[1], seq[3]];
-                    const row = document.createElement('div'); row.className = "flex justify-center items-center gap-1";
+                    const row = document.createElement('div'); row.className = "flex justify-center items-center gap-4";
                     seq.forEach((num, idx) => { if(holes.includes(idx)) { 
                         const b = document.createElement('div'); 
                         b.className = "blank-box"; 
                         const hIdx = holes.indexOf(idx);
                         b.id = `hole-${hIdx}`;
-                        b.onclick = () => {
-                            if(b.classList.contains('filled')) {
-                                b.innerText = '';
-                                b.classList.remove('filled');
-                                userAnswer[hIdx] = null;
-                            }
-                        };
+                        b.onclick = () => { if(b.classList.contains('filled')) { b.innerText = ''; b.classList.remove('filled'); userAnswer[hIdx] = null; } };
                         row.appendChild(b); 
-                    } else row.innerHTML += `<div class="text-2xl font-bold text-gray-300 p-2">${num}</div>`; });
+                    } else row.innerHTML += `<div class="text-5xl font-black text-gray-300 p-6">${num}</div>`; });
                     stage.appendChild(row);
-                    const optArea = document.createElement('div'); optArea.className = "flex gap-2 mt-2";
+                    const optArea = document.createElement('div'); optArea.className = "flex gap-6 mt-4";
                     shuffle([seq[1], seq[3], (seq[1]+3)%10+1]).forEach(n => { const d = document.createElement('div'); d.className = "drag-item"; d.innerText = n; d.onpointerdown = startDrag; optArea.appendChild(d); });
                     opts.appendChild(optArea); 
                     document.getElementById('btn-submit').classList.remove('hidden');
                 }
             } else if (currentUnit === 4 && currentGame === 2) {
-                qText.innerHTML = `<span class="text-orange-600 text-4xl font-black">${CHINESE_NUMS[data]}</span>`;
+                qText.innerHTML = `<span class="text-orange-600 text-6xl font-black">${CHINESE_NUMS[data]}</span>`;
                 currentTarget = data; stage.classList.add('bg-blue-50');
                 if(isShootingStarted) startShootingLogic(stage);
-                else { const ov = document.createElement('div'); ov.className = "absolute inset-0 flex items-center justify-center bg-blue-50/80 z-20"; ov.innerHTML = `<button onclick="startShootingManual(this)" class="bg-white p-4 rounded-full shadow-2xl border-2 border-blue-100"><svg viewBox="0 0 24 24" width="40" height="40" fill="#3b82f6"><path d="M8 5v14l11-7z"/></svg></button>`; stage.appendChild(ov); }
+                else { const ov = document.createElement('div'); ov.className = "absolute inset-0 flex items-center justify-center bg-blue-50/80 z-20"; ov.innerHTML = `<button onclick="startShootingManual(this)" class="bg-white p-8 rounded-full shadow-2xl border-4 border-blue-100"><svg viewBox="0 0 24 24" width="80" height="80" fill="#3b82f6"><path d="M8 5v14l11-7z"/></svg></button>`; stage.appendChild(ov); }
             } else if (currentUnit === 5 || currentUnit === 6) {
                 if (currentGame === 1 && currentUnit === 5) {
                     qText.innerText = "数字组合"; const whole = data, part1 = Math.floor(Math.random()*whole), part2 = whole-part1, hideType = Math.floor(Math.random()*3);
                     currentTarget = (hideType===0)?whole:(hideType===1)?part1:part2;
-                    const bond = document.createElement('div'); bond.className = "relative flex flex-col items-center gap-8";
-                    bond.innerHTML = `<div class="bond-circle bond-whole">${hideType===0?'?':whole}</div><div class="flex gap-12"><div class="bond-circle bond-part">${hideType===1?'?':part1}</div><div class="bond-circle bond-part">${hideType===2?'?':part2}</div></div>`;
+                    const bond = document.createElement('div'); bond.className = "relative flex flex-col items-center gap-14";
+                    bond.innerHTML = `<div class="bond-circle bond-whole text-5xl">${hideType===0?'?':whole}</div><div class="flex gap-24"><div class="bond-circle bond-part text-4xl">${hideType===1?'?':part1}</div><div class="bond-circle bond-part text-4xl">${hideType===2?'?':part2}</div></div>`;
                     const lineSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg"); lineSVG.setAttribute("class", "absolute inset-0 w-full h-full pointer-events-none");
-                    lineSVG.innerHTML = `<line x1="50%" y1="35" x2="25%" y2="105" stroke="#94a3b8" stroke-width="2" /><line x1="50%" y1="35" x2="75%" y2="105" stroke="#94a3b8" stroke-width="2" />`;
+                    lineSVG.innerHTML = `<line x1="50%" y1="50" x2="30%" y2="150" stroke="#94a3b8" stroke-width="5" /><line x1="50%" y1="50" x2="70%" y2="150" stroke="#94a3b8" stroke-width="5" />`;
                     bond.appendChild(lineSVG); stage.appendChild(bond);
-                    shuffle([...new Set([currentTarget, (currentTarget+1)%11, (currentTarget+9)%11])]).forEach(n => opts.appendChild(createItemCard(`<span class="text-2xl font-bold">${n}</span>`, () => checkAnswer(n===currentTarget))));
+                    shuffle([...new Set([currentTarget, (currentTarget+1)%11, (currentTarget+9)%11])]).forEach(n => opts.appendChild(createItemCard(`<span class="text-4xl font-black">${n}</span>`, () => checkAnswer(n===currentTarget))));
                 } else if (currentGame === 2 && currentUnit === 5) {
-                    qText.innerText = "1-10 加法"; const {a, b, sum} = data;
-                    stage.innerHTML = `<div class="text-5xl font-black text-violet-600 tracking-widest">${a} + ${b} = ?</div>`;
-                    shuffle([...new Set([sum, (sum+1)%11, (sum+9)%11])]).forEach(n => opts.appendChild(createItemCard(`<span class="text-2xl font-bold">${n}</span>`, () => checkAnswer(n===sum))));
+                    qText.innerText = "1-10 加法题"; const {a, b, sum} = data;
+                    stage.innerHTML = `<div class="text-[8rem] font-black text-violet-600 tracking-widest">${a} + ${b} = ?</div>`;
+                    shuffle([...new Set([sum, (sum+1)%11, (sum+9)%11])]).forEach(n => opts.appendChild(createItemCard(`<span class="text-4xl font-bold">${n}</span>`, () => checkAnswer(n===sum))));
                 } else {
-                    qText.innerText = "11-20 加法"; 
+                    qText.innerText = "11-20 加法题"; 
                     const {a, b, sum, hideType, target} = data;
                     currentTarget = target;
                     const train = document.createElement('div'); train.className = "train-container";
-                    let carA = `<div class="train-car" style="${hideType===0?'background:#fffbeb;border-style:dashed':''}"><span>${a}</span><div class="train-wheel" style="left:12px"></div><div class="train-wheel" style="right:12px"></div></div>`;
-                    let carB = `<div class="train-car" style="${hideType===1?'background:#fffbeb;border-style:dashed':''}"><span>${b}</span><div class="train-wheel" style="left:12px"></div><div class="train-wheel" style="right:12px"></div></div>`;
+                    let carA = `<div class="train-car" style="${hideType===0?'background:#fffbeb;border-style:dashed':''}"><span>${a}</span><div class="train-wheel" style="left:18px"></div><div class="train-wheel" style="right:18px"></div></div>`;
+                    let carB = `<div class="train-car" style="${hideType===1?'background:#fffbeb;border-style:dashed':''}"><span>${b}</span><div class="train-wheel" style="left:18px"></div><div class="train-wheel" style="right:18px"></div></div>`;
                     let engine = `<div class="train-engine" style="${hideType===2?'background:#fee2e2;border-style:dashed;border-color:#f87171':''}">
-                            <div class="text-xl font-black" style="${hideType===2?'color:#b91c1c':''}">${hideType===2 ? '?' : sum}</div>
-                            <div class="train-wheel" style="left:8px"></div>
-                            <div class="train-wheel" style="right:8px"></div>
+                            <div class="text-3xl font-black" style="${hideType===2?'color:#b91c1c':''}">${hideType===2 ? '?' : sum}</div>
+                            <div class="train-wheel" style="left:15px"></div>
+                            <div class="train-wheel" style="right:15px"></div>
                         </div>`;
                     train.innerHTML = carA + `<div class="train-hook"></div>` + carB + `<div class="train-hook"></div>` + engine;
-                    const scale = Math.min(1.2, stage.clientHeight / 180);
+                    const scale = Math.min(1.5, stage.clientHeight / 140);
                     train.style.transform = `scale(${scale})`;
                     stage.appendChild(train);
                     let choices = [currentTarget];
@@ -498,13 +466,13 @@
                         let r = Math.floor(Math.random() * (maxRange - minRange + 1)) + minRange;
                         if(!choices.includes(r)) choices.push(r);
                     }
-                    shuffle(choices).forEach(n => opts.appendChild(createItemCard(`<span class="text-2xl font-bold">${n}</span>`, () => checkAnswer(n===currentTarget))));
+                    shuffle(choices).forEach(n => opts.appendChild(createItemCard(`<span class="text-4xl font-bold">${n}</span>`, () => checkAnswer(n===currentTarget))));
                 }
             }
         }
 
         function createItemCard(html, onClick) {
-            const d = document.createElement('div'); d.className = "p-3 bg-white rounded-xl border-2 border-gray-50 shadow-sm active:scale-90 flex items-center justify-center min-w-[60px] cursor-pointer";
+            const d = document.createElement('div'); d.className = "p-5 bg-white rounded-3xl border-2 border-gray-100 shadow-md active:scale-90 flex items-center justify-center min-w-[90px] cursor-pointer hover:bg-blue-50";
             d.innerHTML = html; d.onclick = onClick; return d;
         }
 
@@ -521,7 +489,7 @@
             const canvas = document.getElementById('canvas-confetti'), ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             const particles = [];
-            for (let i = 0; i < 60; i++) particles.push({ x: Math.random() * canvas.width, y: -20, w: Math.random() * 4 + 2, h: Math.random() * 8 + 4, color: `hsl(${Math.random()*360}, 70%, 50%)`, vx: (Math.random() - 0.5) * 6, vy: Math.random() * 5 + 4, angle: Math.random() * 360, vAngle: (Math.random() - 0.5) * 10 });
+            for (let i = 0; i < 80; i++) particles.push({ x: Math.random() * canvas.width, y: -20, w: Math.random() * 8 + 2, h: Math.random() * 12 + 4, color: `hsl(${Math.random()*360}, 70%, 50%)`, vx: (Math.random() - 0.5) * 10, vy: Math.random() * 7 + 6, angle: Math.random() * 360, vAngle: (Math.random() - 0.5) * 20 });
             function frame() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 let alive = false;
@@ -531,14 +499,14 @@
             frame();
         }
 
-        function getShapeSVG(s, size) {
-            let inner = '';
-            if(s.path==='circle') inner=`<circle cx="50" cy="50" r="40" fill="${s.color}"/>`;
-            else if(s.path==='rect') inner=`<rect x="15" y="15" width="70" height="70" fill="${s.color}"/>`;
-            else if(s.path==='rect-long') inner=`<rect x="10" y="25" width="80" height="50" fill="${s.color}"/>`;
-            else if(s.path==='ellipse') inner=`<ellipse cx="50" cy="50" rx="45" ry="30" fill="${s.color}"/>`;
-            else inner=`<polygon points="${s.path}" fill="${s.color}"/>`;
-            return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">${inner}</svg>`;
+        function getShapeSVG(shape, size = 80) {
+            let content = '';
+            if (shape.path === 'circle') content = `<circle cx="50" cy="50" r="40" fill="${shape.color}" />`;
+            else if (shape.path === 'rect') content = `<rect x="15" y="15" width="70" height="70" fill="${shape.color}" />`;
+            else if (shape.path === 'rect-long') content = `<rect x="10" y="25" width="80" height="50" fill="${shape.color}" />`;
+            else if (shape.path === 'ellipse') content = `<ellipse cx="50" cy="50" rx="45" ry="30" fill="${shape.color}" />`;
+            else content = `<polygon points="${shape.path}" fill="${shape.color}" />`;
+            return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">${content}</svg>`;
         }
 
         function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -559,11 +527,7 @@
             document.onpointerup = endDrag;
         }
 
-        function moveDrag(e) {
-            if(!dragEl) return;
-            dragEl.style.left = (e.clientX - startX) + 'px';
-            dragEl.style.top = (e.clientY - startY) + 'px';
-        }
+        function moveDrag(e) { if(!dragEl) return; dragEl.style.left = (e.clientX - startX) + 'px'; dragEl.style.top = (e.clientY - startY) + 'px'; }
 
         function endDrag(e) {
             document.onpointermove = null;
@@ -588,9 +552,9 @@
             let val = (balloonsSpawnedSinceCorrect >= 4 || Math.random() < 0.3) ? currentTarget : Math.floor(Math.random()*10)+11;
             if(val === currentTarget) balloonsSpawnedSinceCorrect = 0;
             const b = document.createElement('div'); b.className = "target-item"; 
-            b.style.left = Math.random() * (parent.clientWidth - 70) + 'px';
-            b.innerHTML = `<div class="relative w-[60px] h-[80px] flex items-center justify-center"><svg viewBox="0 0 100 120" class="absolute inset-0 drop-shadow-md"><ellipse cx="50" cy="50" rx="45" ry="50" fill="hsl(${Math.random()*360},70%,60%)" /><path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none" /></svg><span class="relative text-xl font-bold text-white">${val}</span></div>`;
-            b.onpointerdown = (e) => { e.preventDefault(); if(val === currentTarget) { b.innerHTML = "<div class='text-5xl'>💥</div>"; setTimeout(() => checkAnswer(true), 400); } else { b.remove(); playVoice("再试一次"); } };
+            b.style.left = Math.random() * (parent.clientWidth - 100) + 'px';
+            b.innerHTML = `<div class="relative w-[80px] h-[100px] flex items-center justify-center"><svg viewBox="0 0 100 120" class="absolute inset-0 drop-shadow-md"><ellipse cx="50" cy="50" rx="45" ry="50" fill="hsl(${Math.random()*360},70%,60%)" /><path d="M50 100 L50 120" stroke="#94a3b8" stroke-width="2" fill="none" /></svg><span class="relative text-3xl font-bold text-white">${val}</span></div>`;
+            b.onpointerdown = (e) => { e.preventDefault(); if(val === currentTarget) { b.innerHTML = "<div class='text-7xl'>💥</div>"; setTimeout(() => checkAnswer(true), 400); } else { b.remove(); playVoice("再试一次"); } };
             parent.appendChild(b); 
             setTimeout(() => { if(b.parentNode === parent) b.remove(); }, 6000);
         }
